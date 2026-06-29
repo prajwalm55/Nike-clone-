@@ -1,4 +1,7 @@
-import type { AuthResponse, Cart, Product, User } from '../types'
+import type {
+  AuthResponse, Cart, Product, User, Review, WishlistItem,
+  ShoeFinderResult, ShoeFinderPrefs, SizeAdvice, MemberProfile,
+} from '../types'
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api'
 
@@ -102,4 +105,45 @@ export const api = {
     request<Cart>(`/cart/items/${itemId}/`, { method: 'DELETE' }),
 
   clearCart: () => request<Cart>('/cart/clear/', { method: 'DELETE' }),
+
+  getTrending: () => request<Product[]>('/products/trending/'),
+
+  shoeFinder: (prefs: ShoeFinderPrefs) =>
+    request<ShoeFinderResult>('/shoe-finder/', {
+      method: 'POST',
+      body: JSON.stringify(prefs),
+    }),
+
+  sizeAdvisor: (data: { brand: string; current_size: string; product_id: number }) =>
+    request<SizeAdvice>('/size-advisor/', {
+      method: 'POST',
+      body: JSON.stringify(data),
+    }),
+
+  getReviews: (productId: number) =>
+    request<{ reviews: Review[]; average_rating: number; review_count: number }>(
+      `/products/${productId}/reviews/`,
+    ),
+
+  addReview: (productId: number, rating: number, comment: string) =>
+    request<Review>(`/products/${productId}/reviews/`, {
+      method: 'POST',
+      body: JSON.stringify({ rating, comment }),
+    }),
+
+  getWishlist: () => request<WishlistItem[]>('/wishlist/'),
+
+  addToWishlist: (productId: number) =>
+    request<WishlistItem[]>('/wishlist/', {
+      method: 'POST',
+      body: JSON.stringify({ product_id: productId }),
+    }),
+
+  removeFromWishlist: (productId: number) =>
+    request<WishlistItem[]>('/wishlist/', {
+      method: 'DELETE',
+      body: JSON.stringify({ product_id: productId }),
+    }),
+
+  getMember: () => request<MemberProfile>('/member/'),
 }

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
+import { useWishlist } from '../context/WishlistContext'
 
 function NikeLogo() {
   return (
@@ -14,6 +15,7 @@ function NikeLogo() {
 export default function Header() {
   const { user, logout } = useAuth()
   const { cart } = useCart()
+  const { items: wishlistItems } = useWishlist()
   const navigate = useNavigate()
   const location = useLocation()
   const [search, setSearch] = useState('')
@@ -29,10 +31,10 @@ export default function Header() {
   }
 
   const navLinks = [
+    { to: '/shoe-finder', label: 'Shoe Finder' },
     { to: '/products?gender=men', label: 'Men' },
     { to: '/products?gender=women', label: 'Women' },
     { to: '/products?category=Jordan', label: 'Jordan' },
-    { to: '/products?category=Running', label: 'Running' },
     { to: '/products?new=true', label: 'New' },
   ]
 
@@ -99,6 +101,21 @@ export default function Header() {
                 </svg>
               </Link>
             )}
+
+            <Link to="/member" title="Membership">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+              </svg>
+            </Link>
+
+            <Link to="/wishlist" className="cart-icon-wrap" title="Favorites">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z" />
+              </svg>
+              {wishlistItems.length > 0 && (
+                <span className="cart-badge">{wishlistItems.length}</span>
+              )}
+            </Link>
 
             <Link to="/cart" className="cart-icon-wrap" title="Cart">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">

@@ -1,19 +1,36 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import Product, Cart, CartItem
+from .models import Product, Cart, CartItem, Review, WishlistItem, MemberProfile
 
 
 class ProductSerializer(serializers.ModelSerializer):
+    average_rating = serializers.SerializerMethodField()
+    review_count = serializers.SerializerMethodField()
+
     class Meta:
         model = Product
         fields = '__all__'
+
+    def get_average_rating(self, obj):
+        return obj.average_rating
+
+    def get_review_count(self, obj):
+        return obj.review_count
 
 
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ['id', 'username', 'email', 'first_name', 'last_name']
+
+
+class MemberProfileSerializer(serializers.ModelSerializer):
+    next_tier_points = serializers.ReadOnlyField()
+
+    class Meta:
+        model = MemberProfile
+        fields = ['points', 'tier', 'shoes_owned', 'next_tier_points']
 
 
 class RegisterSerializer(serializers.ModelSerializer):
@@ -34,7 +51,30 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User(**validated_data)
         user.set_password(password)
         user.save()
+        MemberProfile.objects.create(user=user)
         return user
+
+
+class ReviewSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(source='user.username', read_only=True)
+
+    class Meta:
+        model = Review
+        fields = ['id', 'product', 'username', 'rating', 'comment', 'created_at']
+        read_only_fields = ['product', 'username', 'created_at']
+
+
+class CreateReviewSerializer(serializers.Serializer):
+    rating = serializers.IntegerField(min_value=1, max_value=5)
+    comment = serializers.CharField(max_length=1000)
+
+
+class WishlistItemSerializer(serializers.ModelSerializer):
+    product = ProductSerializer(read_only=True)
+
+    class Meta:
+        model = WishlistItem
+        fields = ['id', 'product', 'created_at']
 
 
 class CartItemSerializer(serializers.ModelSerializer):
@@ -65,3 +105,17 @@ class AddToCartSerializer(serializers.Serializer):
 class UpdateCartItemSerializer(serializers.Serializer):
     quantity = serializers.IntegerField(min_value=1)
     size = serializers.CharField(max_length=20, required=False)
+
+
+class ShoeFinderSerializer(serializers.Serializer):
+    activity = serializers.ChoiceField(choices=['running', 'training', 'lifestyle', 'racing'])
+    surface = serializers.ChoiceField(choices=['road', 'trail', 'gym', 'court'])
+    gender = serializers.ChoiceField(choices=['men', 'women', 'unisex'])
+    experience = serializers.ChoiceField(choices=['beginner', 'intermediate', 'advanced'])
+    budget = serializers.ChoiceField(choices=['under150', '150to200', 'over200'])
+
+
+class SizeAdvisorSerializer(serializers.Serializer):
+    brand = serializers.ChoiceField(choices=['nike', 'adidas', 'new_balance', 'puma'])
+    current_size = serializers.CharField(max_length=10)
+    product_id = serializers.IntegerField()

@@ -418,6 +418,13 @@ input {
   margin: 0 auto;
 }
 
+.product-detail-reviews {
+  grid-column: 1 / -1;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 0 24px 48px;
+}
+
 .product-gallery {
   display: flex;
   flex-direction: column;
@@ -894,6 +901,538 @@ input {
   color: inherit;
 }
 
+/* ---- Innovative Features ---- */
+
+.feature-badge {
+  display: inline-block;
+  background: var(--black);
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.innovation-banner {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4px;
+  max-width: 1440px;
+  margin: 0 auto;
+  padding: 0 24px;
+}
+
+.innovation-card {
+  background: var(--gray-100);
+  padding: 48px 32px;
+  border-radius: 4px;
+}
+
+.innovation-card.dark {
+  background: var(--black);
+  color: var(--white);
+}
+
+.innovation-card h2 {
+  font-size: 28px;
+  font-weight: 500;
+  margin-bottom: 12px;
+}
+
+.innovation-card p {
+  margin-bottom: 24px;
+  opacity: 0.85;
+  line-height: 1.6;
+}
+
+.star-rating {
+  display: inline-flex;
+  gap: 2px;
+  color: #f5a623;
+}
+
+.product-card-wrap { position: relative; }
+
+.product-card-actions {
+  position: absolute;
+  bottom: 12px;
+  right: 12px;
+  display: flex;
+  gap: 8px;
+  opacity: 0;
+  transition: opacity 0.2s;
+}
+
+.product-card:hover .product-card-actions { opacity: 1; }
+
+.action-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: var(--white);
+  border: none;
+  font-size: 16px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.15);
+  cursor: pointer;
+  transition: transform 0.2s;
+}
+
+.action-btn:hover { transform: scale(1.1); }
+.action-btn.active { background: var(--black); color: var(--white); }
+
+.live-badge {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #e50000;
+  color: var(--white);
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+}
+
+.product-card-rating {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--gray-600);
+  margin-bottom: 4px;
+}
+
+.card-toast {
+  font-size: 12px;
+  color: var(--gray-600);
+  text-align: center;
+  margin-top: 4px;
+}
+
+/* 360 Viewer */
+.viewer-360-wrap { width: 100%; }
+
+.viewer-360 {
+  aspect-ratio: 1;
+  background: var(--gray-100);
+  border-radius: 4px;
+  overflow: hidden;
+  cursor: grab;
+  position: relative;
+  user-select: none;
+}
+
+.viewer-360:active { cursor: grabbing; }
+.viewer-360 img { width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+
+.viewer-360-hint {
+  position: absolute;
+  bottom: 12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background: rgba(0,0,0,0.7);
+  color: var(--white);
+  font-size: 12px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.viewer-360-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.viewer-360-dots button {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--gray-300);
+  border: none;
+  padding: 0;
+}
+
+.viewer-360-dots button.active { background: var(--black); }
+
+.live-viewers {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: var(--gray-600);
+  margin-top: 12px;
+}
+
+.live-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #22c55e;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.4; }
+}
+
+/* Size Advisor */
+.size-advisor {
+  background: var(--gray-100);
+  border-radius: 4px;
+  padding: 20px;
+  margin-bottom: 24px;
+}
+
+.size-advisor h4 { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
+.size-advisor-desc { font-size: 14px; color: var(--gray-600); margin-bottom: 16px; }
+
+.size-advisor-form {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.size-advisor-form select,
+.size-advisor-form input {
+  padding: 10px 12px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: 4px;
+  font-size: 14px;
+  background: var(--white);
+}
+
+.size-advisor-result {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid var(--gray-300);
+}
+
+.size-advisor-rec {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.rec-size { font-size: 32px; font-weight: 700; }
+.rec-confidence { font-size: 14px; color: #22c55e; font-weight: 600; }
+
+.product-rating-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 12px;
+  font-size: 14px;
+  color: var(--gray-600);
+}
+
+/* Reviews */
+.reviews-section { margin-top: 32px; }
+
+.reviews-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 24px;
+}
+
+.reviews-summary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.review-form {
+  background: var(--gray-100);
+  padding: 20px;
+  border-radius: 4px;
+  margin-bottom: 24px;
+}
+
+.review-form-label { font-size: 14px; font-weight: 500; margin-bottom: 8px; }
+
+.review-stars-input {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 12px;
+}
+
+.review-stars-input button {
+  font-size: 24px;
+  background: none;
+  border: none;
+  color: var(--gray-300);
+  cursor: pointer;
+}
+
+.review-stars-input button.active { color: #f5a623; }
+
+.review-form textarea {
+  width: 100%;
+  padding: 12px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: 4px;
+  font-family: inherit;
+  font-size: 14px;
+  margin-bottom: 12px;
+  resize: vertical;
+}
+
+.review-card {
+  padding: 16px 0;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.review-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+/* Shoe Finder */
+.shoe-finder-page {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: 48px 24px;
+}
+
+.shoe-finder-hero { text-align: center; margin-bottom: 48px; }
+.shoe-finder-hero h1 { font-size: 36px; font-weight: 500; margin-bottom: 8px; }
+.shoe-finder-hero p { color: var(--gray-600); margin-bottom: 24px; }
+
+.progress-bar {
+  height: 4px;
+  background: var(--gray-200);
+  border-radius: 2px;
+  overflow: hidden;
+}
+
+.progress-fill {
+  height: 100%;
+  background: var(--black);
+  transition: width 0.4s ease;
+}
+
+.shoe-finder-step { text-align: center; }
+.step-count { font-size: 14px; color: var(--gray-500); margin-bottom: 8px; }
+.shoe-finder-step h2 { font-size: 24px; font-weight: 500; margin-bottom: 32px; }
+
+.option-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: 12px;
+  margin-bottom: 24px;
+}
+
+.option-card {
+  padding: 24px 16px;
+  border: 2px solid var(--gray-200);
+  border-radius: 8px;
+  background: var(--white);
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: all 0.2s;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+}
+
+.option-card:hover {
+  border-color: var(--black);
+  transform: translateY(-2px);
+}
+
+.option-icon { font-size: 28px; }
+
+.shoe-finder-results { text-align: center; }
+.shoe-finder-results h2 { font-size: 28px; margin-bottom: 8px; }
+.results-subtitle { color: var(--gray-600); margin-bottom: 32px; }
+
+.match-card-wrap { display: flex; flex-direction: column; }
+.match-reason {
+  font-size: 13px;
+  color: var(--gray-600);
+  margin-top: 8px;
+  padding: 0 4px;
+  line-height: 1.4;
+}
+
+/* Compare */
+.compare-bar {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: var(--black);
+  color: var(--white);
+  padding: 12px 24px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  z-index: 90;
+}
+
+.compare-bar-label { font-size: 14px; font-weight: 500; white-space: nowrap; }
+.compare-bar-items { display: flex; gap: 8px; flex: 1; }
+
+.compare-bar-item {
+  position: relative;
+  width: 48px;
+  height: 48px;
+  border-radius: 4px;
+  overflow: hidden;
+}
+
+.compare-bar-item img { width: 100%; height: 100%; object-fit: cover; }
+
+.compare-bar-item button {
+  position: absolute;
+  top: -4px;
+  right: -4px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: var(--white);
+  color: var(--black);
+  border: none;
+  font-size: 12px;
+  cursor: pointer;
+}
+
+.compare-bar-btn { padding: 8px 20px; font-size: 14px; white-space: nowrap; }
+
+.compare-page { max-width: 1200px; margin: 0 auto; padding: 48px 24px; }
+.compare-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 32px; }
+.compare-header h1 { font-size: 28px; font-weight: 500; }
+
+.compare-table { width: 100%; border-collapse: collapse; }
+.compare-table th, .compare-table td { padding: 16px; border-bottom: 1px solid var(--gray-200); text-align: center; vertical-align: middle; }
+.compare-table th img { width: 120px; height: 120px; object-fit: cover; border-radius: 4px; margin-bottom: 8px; }
+.compare-table th a { display: flex; flex-direction: column; align-items: center; gap: 8px; text-decoration: none; color: inherit; }
+.compare-label { font-weight: 500; text-align: left !important; color: var(--gray-600); }
+.compare-remove { position: absolute; top: 8px; right: 8px; background: none; border: none; font-size: 20px; cursor: pointer; }
+
+/* Wishlist */
+.wishlist-page { max-width: 1200px; margin: 0 auto; padding: 48px 24px; }
+.wishlist-grid { display: flex; flex-direction: column; gap: 24px; }
+
+.wishlist-card {
+  display: flex;
+  gap: 24px;
+  padding: 24px 0;
+  border-bottom: 1px solid var(--gray-200);
+}
+
+.wishlist-card-image {
+  width: 150px;
+  height: 150px;
+  background: var(--gray-100);
+  border-radius: 4px;
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.wishlist-card-image img { width: 100%; height: 100%; object-fit: cover; }
+.wishlist-card-info h3 { font-size: 16px; font-weight: 500; margin-bottom: 4px; }
+.wishlist-card-actions { display: flex; gap: 12px; margin-top: 16px; }
+
+/* Member */
+.member-page { max-width: 800px; margin: 0 auto; padding: 48px 24px; }
+
+.member-hero {
+  background: var(--gray-100);
+  border-radius: 8px;
+  padding: 48px 32px;
+  text-align: center;
+  border-bottom: 4px solid var(--gray-400);
+  margin-bottom: 32px;
+}
+
+.member-tier-badge {
+  display: inline-block;
+  color: var(--white);
+  font-size: 12px;
+  font-weight: 700;
+  letter-spacing: 0.1em;
+  padding: 6px 16px;
+  border-radius: 999px;
+  margin-bottom: 16px;
+}
+
+.member-hero h1 { font-size: 28px; font-weight: 500; margin-bottom: 8px; }
+.member-points { font-size: 48px; font-weight: 700; margin-bottom: 4px; }
+.member-next-tier { font-size: 14px; color: var(--gray-600); margin-bottom: 16px; }
+
+.tier-progress {
+  height: 6px;
+  background: var(--gray-300);
+  border-radius: 3px;
+  overflow: hidden;
+  max-width: 300px;
+  margin: 0 auto;
+}
+
+.tier-progress-fill {
+  height: 100%;
+  background: var(--black);
+  transition: width 0.5s ease;
+}
+
+.member-stats {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+  margin-bottom: 32px;
+}
+
+.member-stat {
+  text-align: center;
+  padding: 20px;
+  background: var(--gray-100);
+  border-radius: 4px;
+}
+
+.stat-value { display: block; font-size: 24px; font-weight: 700; margin-bottom: 4px; }
+.stat-label { font-size: 12px; color: var(--gray-600); }
+
+.member-benefits { margin-bottom: 32px; }
+.member-benefits h2 { font-size: 20px; margin-bottom: 16px; }
+.member-benefits ul { list-style: none; }
+.member-benefits li { padding: 8px 0; font-size: 16px; }
+
+.member-cta h2 { font-size: 20px; margin-bottom: 16px; }
+
+.member-cta-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 16px;
+}
+
+.cta-card {
+  background: var(--gray-100);
+  padding: 24px;
+  border-radius: 4px;
+  text-decoration: none;
+  color: inherit;
+  transition: transform 0.2s;
+}
+
+.cta-card:hover { transform: translateY(-2px); }
+.cta-card span { font-size: 32px; }
+.cta-card h3 { font-size: 16px; font-weight: 500; margin: 8px 0 4px; }
+.cta-card p { font-size: 13px; color: var(--gray-600); }
+
 /* Responsive */
 @media (max-width: 768px) {
   .header-nav {
@@ -933,5 +1472,13 @@ input {
 
   .hero-content {
     padding: 24px;
+  }
+
+  .innovation-banner {
+    grid-template-columns: 1fr;
+  }
+
+  .compare-table-wrap {
+    overflow-x: auto;
   }
 }

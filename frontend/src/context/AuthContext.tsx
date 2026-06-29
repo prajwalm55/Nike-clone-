@@ -7,10 +7,11 @@ import {
   type ReactNode,
 } from 'react'
 import { api } from '../api/client'
-import type { User } from '../types'
+import type { User, MemberProfile } from '../types'
 
 interface AuthContextType {
   user: User | null
+  member: MemberProfile | null
   loading: boolean
   login: (email: string, password: string) => Promise<void>
   register: (
@@ -27,6 +28,7 @@ const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null)
+  const [member, setMember] = useState<MemberProfile | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -34,7 +36,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     if (token) {
       api
         .getMe()
-        .then(setUser)
+        .then((data) => {
+          setUser(data)
+          setMember(data.member ?? null)
+        })
         .catch(() => localStorage.removeItem('token'))
         .finally(() => setLoading(false))
     } else {
@@ -46,6 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const res = await api.login({ email, password })
     localStorage.setItem('token', res.token)
     setUser(res.user)
+    setMember(res.member ?? null)
   }, [])
 
   const register = useCallback(
@@ -65,6 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       })
       localStorage.setItem('token', res.token)
       setUser(res.user)
+      setMember(res.member ?? null)
     },
     [],
   )
@@ -77,10 +84,11 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
     localStorage.removeItem('token')
     setUser(null)
+    setMember(null)
   }, [])
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, member, loading, login, register, logout }}>
       {children}
     </AuthContext.Provider>
   )

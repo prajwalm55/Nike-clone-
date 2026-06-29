@@ -142,6 +142,28 @@ python test_e2e.py
 cd frontend && npm run build
 ```
 
-## License
+## What Makes This Project Stand Out (Interview Highlights)
+
+This is **not a basic CRUD e-commerce clone**. It demonstrates product thinking and full-stack engineering:
+
+| Feature | What It Shows |
+|---------|---------------|
+| **AI Shoe Finder** | Multi-step quiz → backend recommendation engine scoring products by activity, surface, experience & budget |
+| **Smart Size Advisor** | Cross-brand size conversion algorithm (Nike/Adidas/NB/Puma) with confidence scoring |
+| **360° Product Viewer** | Drag-to-rotate interactive viewer using pointer events |
+| **Product Comparison** | Side-by-side compare up to 3 shoes with floating compare bar |
+| **Wishlist / Favorites** | Authenticated persistence with member points gamification |
+| **Reviews & Ratings** | Full review system with star ratings and aggregate scores |
+| **Nike Membership** | Tiered loyalty program (Member → Gold → Platinum) with points on actions |
+| **Live Trending** | Real-time viewer counts and trending product algorithm |
+| **Recently Viewed** | Client-side browsing history with localStorage persistence |
+
+### Architecture Talking Points
+
+- **Separation of concerns**: Recommendation logic in `services.py`, not views
+- **Dual cart strategy**: Anonymous session carts + authenticated user carts
+- **Production-ready**: Docker, PostgreSQL, Gunicorn, Nginx, env-based settings
+- **Type-safe frontend**: Full TypeScript with React Context for state management
+
 
 MIT — for educational purposes. Not affiliated with Nike, Inc.

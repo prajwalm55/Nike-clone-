@@ -13,6 +13,10 @@ export interface Product {
   is_featured: boolean
   is_new: boolean
   created_at: string
+  average_rating?: number
+  review_count?: number
+  live_viewers?: number
+  trending_score?: number
 }
 
 export interface User {
@@ -21,6 +25,29 @@ export interface User {
   email: string
   first_name: string
   last_name: string
+  member?: MemberProfile
+}
+
+export interface MemberProfile {
+  points: number
+  tier: 'member' | 'gold' | 'platinum'
+  shoes_owned: number
+  next_tier_points: number
+}
+
+export interface Review {
+  id: number
+  product: number
+  username: string
+  rating: number
+  comment: string
+  created_at: string
+}
+
+export interface WishlistItem {
+  id: number
+  product: Product
+  created_at: string
 }
 
 export interface CartItem {
@@ -43,4 +70,25 @@ export interface Cart {
 export interface AuthResponse {
   user: User
   token: string
+  member?: MemberProfile
+}
+
+export interface ShoeFinderResult {
+  matches: Product[]
+  match_reasons: Record<number, string>
+}
+
+export interface SizeAdvice {
+  recommended_size: string
+  confidence: number
+  fit_note: string
+  available_sizes: string[]
+}
+
+export interface ShoeFinderPrefs {
+  activity: 'running' | 'training' | 'lifestyle' | 'racing'
+  surface: 'road' | 'trail' | 'gym' | 'court'
+  gender: 'men' | 'women' | 'unisex'
+  experience: 'beginner' | 'intermediate' | 'advanced'
+  budget: 'under150' | '150to200' | 'over200'
 }

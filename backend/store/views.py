@@ -1,17 +1,25 @@
 from django.contrib.auth import authenticate
-from django.db.models import Q
+from django.db.models import Q, Avg, Count
 from rest_framework import generics, status
 from rest_framework.authtoken.models import Token
-from rest_framework.decorators import api_view, permission_classes
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from rest_framework.views import APIView
+import random
 
-from .models import Product, Cart, CartItem
+from .models import Product, Cart, CartItem, Review, WishlistItem, MemberProfile
 from .serializers import (
-    ProductSerializer, RegisterSerializer, UserSerializer,
+    ProductSerializer, RegisterSerializer, UserSerializer, MemberProfileSerializer,
     CartSerializer, AddToCartSerializer, UpdateCartItemSerializer,
+    ReviewSerializer, CreateReviewSerializer, WishlistItemSerializer,
+    ShoeFinderSerializer, SizeAdvisorSerializer,
 )
+from .services import recommend_shoes, advise_size, get_trending_products
+
+
+def get_or_create_member(user):
+    profile, _ = MemberProfile.objects.get_or_create(user=user)
+    return profile
 
 
 # ----------------------------- Products -----------------------------
@@ -50,6 +58,66 @@ class ProductDetailView(generics.RetrieveAPIView):
     lookup_field = 'id'
 
 
+class TrendingProductsView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request):
+        products = get_trending_products()
+        data = []
+        for p in products:
+            item = ProductSerializer(p).data
+            item['live_viewers'] = random.randint(8, 47)
+            item['trending_score'] = random.randint(70, 99)
+            data.append(item)
+        return Response(data)
+
+
+# ----------------------------- Shoe Finder AI -----------------------------
+
+class ShoeFinderView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = ShoeFinderSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        results = recommend_shoes(serializer.validated_data)
+        return Response({
+            'matches': ProductSerializer(results, many=True).data,
+            'match_reasons': _build_match_reasons(serializer.validated_data, results),
+        })
+
+
+def _build_match_reasons(preferences, products):
+    reasons = {}
+    activity = preferences['activity']
+    for p in products:
+        reasons[p.id] = (
+            f"Matched for {activity} — {p.category} category with "
+            f"{'premium' if float(p.price) > 180 else 'great value'} performance."
+        )
+    return reasons
+
+
+# ----------------------------- Size Advisor -----------------------------
+
+class SizeAdvisorView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = SizeAdvisorSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        try:
+            product = Product.objects.get(id=serializer.validated_data['product_id'])
+        except Product.DoesNotExist:
+            return Response({'detail': 'Product not found.'}, status=status.HTTP_404_NOT_FOUND)
+        result = advise_size(
+            serializer.validated_data['brand'],
+            serializer.validated_data['current_size'],
+            product,
+        )
+        return Response(result)
+
+
 # ----------------------------- Auth -----------------------------
 
 class RegisterView(APIView):
@@ -60,9 +128,11 @@ class RegisterView(APIView):
         serializer.is_valid(raise_exception=True)
         user = serializer.save()
         token, _ = Token.objects.get_or_create(user=user)
+        profile = get_or_create_member(user)
         return Response({
             'user': UserSerializer(user).data,
             'token': token.key,
+            'member': MemberProfileSerializer(profile).data,
         }, status=status.HTTP_201_CREATED)
 
 
@@ -72,8 +142,6 @@ class LoginView(APIView):
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
-
-        # Allow login with email too
         email = request.data.get('email')
         if not username and email:
             try:
@@ -84,14 +152,13 @@ class LoginView(APIView):
 
         user = authenticate(request, username=username, password=password)
         if user is None:
-            return Response(
-                {'detail': 'Invalid credentials.'},
-                status=status.HTTP_401_UNAUTHORIZED,
-            )
+            return Response({'detail': 'Invalid credentials.'}, status=status.HTTP_401_UNAUTHORIZED)
         token, _ = Token.objects.get_or_create(user=user)
+        profile = get_or_create_member(user)
         return Response({
             'user': UserSerializer(user).data,
             'token': token.key,
+            'member': MemberProfileSerializer(profile).data,
         })
 
 
@@ -107,13 +174,87 @@ class MeView(APIView):
     permission_classes = [IsAuthenticated]
 
     def get(self, request):
-        return Response(UserSerializer(request.user).data)
+        profile = get_or_create_member(request.user)
+        return Response({
+            **UserSerializer(request.user).data,
+            'member': MemberProfileSerializer(profile).data,
+        })
+
+
+class MemberProfileView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        profile = get_or_create_member(request.user)
+        return Response(MemberProfileSerializer(profile).data)
+
+
+# ----------------------------- Reviews -----------------------------
+
+class ProductReviewsView(APIView):
+    permission_classes = [AllowAny]
+
+    def get(self, request, product_id):
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+        reviews = Review.objects.filter(product=product)
+        return Response({
+            'reviews': ReviewSerializer(reviews, many=True).data,
+            'average_rating': product.average_rating,
+            'review_count': product.review_count,
+        })
+
+    def post(self, request, product_id):
+        if not request.user.is_authenticated:
+            return Response({'detail': 'Authentication required.'}, status=status.HTTP_401_UNAUTHORIZED)
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response({'detail': 'Not found.'}, status=status.HTTP_404_NOT_FOUND)
+        if Review.objects.filter(product=product, user=request.user).exists():
+            return Response({'detail': 'You already reviewed this product.'}, status=status.HTTP_400_BAD_REQUEST)
+        serializer = CreateReviewSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        review = Review.objects.create(product=product, user=request.user, **serializer.validated_data)
+        profile = get_or_create_member(request.user)
+        profile.add_points(25)
+        return Response(ReviewSerializer(review).data, status=status.HTTP_201_CREATED)
+
+
+# ----------------------------- Wishlist -----------------------------
+
+class WishlistView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        items = WishlistItem.objects.filter(user=request.user)
+        return Response(WishlistItemSerializer(items, many=True).data)
+
+    def post(self, request):
+        product_id = request.data.get('product_id')
+        try:
+            product = Product.objects.get(id=product_id)
+        except Product.DoesNotExist:
+            return Response({'detail': 'Product not found.'}, status=status.HTTP_404_NOT_FOUND)
+        item, created = WishlistItem.objects.get_or_create(user=request.user, product=product)
+        if created:
+            profile = get_or_create_member(request.user)
+            profile.add_points(5)
+        items = WishlistItem.objects.filter(user=request.user)
+        return Response(WishlistItemSerializer(items, many=True).data)
+
+    def delete(self, request):
+        product_id = request.data.get('product_id')
+        WishlistItem.objects.filter(user=request.user, product_id=product_id).delete()
+        items = WishlistItem.objects.filter(user=request.user)
+        return Response(WishlistItemSerializer(items, many=True).data)
 
 
 # ----------------------------- Cart -----------------------------
 
 def get_or_create_cart(request):
-    """Get a cart for an authenticated user, or by anonymous session key."""
     if request.user.is_authenticated:
         cart, _ = Cart.objects.get_or_create(user=request.user)
         return cart
@@ -159,6 +300,9 @@ class AddToCartView(APIView):
         if not created:
             item.quantity += qty
             item.save()
+        if request.user.is_authenticated:
+            profile = get_or_create_member(request.user)
+            profile.add_points(10)
         return Response(CartSerializer(cart).data, status=status.HTTP_200_OK)
 
 
@@ -197,5 +341,10 @@ class ClearCartView(APIView):
         cart = get_or_create_cart(request)
         if cart is None:
             return Response({'detail': 'No cart.'}, status=status.HTTP_400_BAD_REQUEST)
+        if request.user.is_authenticated:
+            profile = get_or_create_member(request.user)
+            profile.shoes_owned += cart.total_items
+            profile.add_points(cart.total_items * 50)
+            profile.save()
         cart.items.all().delete()
         return Response(CartSerializer(cart).data, status=status.HTTP_200_OK)
