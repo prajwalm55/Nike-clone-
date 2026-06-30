@@ -1,12 +1,17 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from .models import Product, Cart, CartItem, Review, WishlistItem, MemberProfile
+from .models import (
+    Product, Cart, CartItem, Review, WishlistItem, MemberProfile,
+    Order, OrderItem, NewsletterSubscriber,
+)
 
 
 class ProductSerializer(serializers.ModelSerializer):
     average_rating = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
+    effective_price = serializers.SerializerMethodField()
+    discount_percent = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -17,6 +22,12 @@ class ProductSerializer(serializers.ModelSerializer):
 
     def get_review_count(self, obj):
         return obj.review_count
+
+    def get_effective_price(self, obj):
+        return str(obj.effective_price)
+
+    def get_discount_percent(self, obj):
+        return obj.discount_percent
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -51,7 +62,6 @@ class RegisterSerializer(serializers.ModelSerializer):
         user = User(**validated_data)
         user.set_password(password)
         user.save()
-        MemberProfile.objects.create(user=user)
         return user
 
 
@@ -110,7 +120,7 @@ class UpdateCartItemSerializer(serializers.Serializer):
 class ShoeFinderSerializer(serializers.Serializer):
     activity = serializers.ChoiceField(choices=['running', 'training', 'lifestyle', 'racing'])
     surface = serializers.ChoiceField(choices=['road', 'trail', 'gym', 'court'])
-    gender = serializers.ChoiceField(choices=['men', 'women', 'unisex'])
+    gender = serializers.ChoiceField(choices=['men', 'women', 'unisex', 'kids'])
     experience = serializers.ChoiceField(choices=['beginner', 'intermediate', 'advanced'])
     budget = serializers.ChoiceField(choices=['under150', '150to200', 'over200'])
 
@@ -119,3 +129,25 @@ class SizeAdvisorSerializer(serializers.Serializer):
     brand = serializers.ChoiceField(choices=['nike', 'adidas', 'new_balance', 'puma'])
     current_size = serializers.CharField(max_length=10)
     product_id = serializers.IntegerField()
+
+
+class OrderItemSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = OrderItem
+        fields = ['id', 'product_name', 'quantity', 'size', 'price']
+
+
+class OrderSerializer(serializers.ModelSerializer):
+    items = OrderItemSerializer(many=True, read_only=True)
+
+    class Meta:
+        model = Order
+        fields = ['id', 'total', 'status', 'tracking_number', 'items', 'created_at']
+
+
+class NewsletterSerializer(serializers.Serializer):
+    email = serializers.EmailField()
+
+    def create(self, validated_data):
+        obj, _ = NewsletterSubscriber.objects.get_or_create(email=validated_data['email'])
+        return obj

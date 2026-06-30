@@ -1,5 +1,8 @@
+import { useEffect, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
+import { api } from '../api/client'
+import type { MemberProfile } from '../types'
 
 const TIER_BENEFITS = {
   member: ['Free shipping on orders $150+', 'Early access to sales', 'Birthday reward'],
@@ -14,14 +17,44 @@ const TIER_COLORS = {
 }
 
 export default function MemberPage() {
-  const { user, member } = useAuth()
+  const { user, member: authMember, loading: authLoading } = useAuth()
+  const [member, setMember] = useState<MemberProfile | null>(authMember)
+  const [loading, setLoading] = useState(false)
 
-  if (!user || !member) {
+  useEffect(() => {
+    setMember(authMember)
+  }, [authMember])
+
+  useEffect(() => {
+    if (!user || authMember) return
+    setLoading(true)
+    api
+      .getMember()
+      .then(setMember)
+      .catch(() => setMember(null))
+      .finally(() => setLoading(false))
+  }, [user, authMember])
+
+  if (authLoading || loading) {
+    return <div className="loading"><div className="spinner" /></div>
+  }
+
+  if (!user) {
     return (
       <div className="cart-empty">
         <h2>Nike Membership</h2>
         <p>Join Nike Membership to earn points, unlock tiers, and get exclusive benefits.</p>
         <Link to="/auth" className="btn btn-primary">Join Us — It's Free</Link>
+      </div>
+    )
+  }
+
+  if (!member) {
+    return (
+      <div className="cart-empty">
+        <h2>Nike Membership</h2>
+        <p>We couldn't load your membership profile. Try again from your account.</p>
+        <Link to="/account" className="btn btn-primary">Go to Account</Link>
       </div>
     )
   }

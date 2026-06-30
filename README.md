@@ -6,6 +6,8 @@ Live-style features: product catalog, search & filters, product detail with size
 
 Repository: [github.com/prajwalm55/Nike-clone-](https://github.com/prajwalm55/Nike-clone-)
 
+**Full documentation (install, setup, PRD, tech stack, API):** [docs/DOCUMENTATION.md](docs/DOCUMENTATION.md)
+
 ## Tech Stack
 
 | Layer | Technology |

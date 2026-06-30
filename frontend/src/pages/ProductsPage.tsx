@@ -9,6 +9,7 @@ const GENDERS = [
   { value: 'men', label: 'Men' },
   { value: 'women', label: 'Women' },
   { value: 'unisex', label: 'Unisex' },
+  { value: 'kids', label: 'Kids' },
 ]
 
 const CATEGORIES = [
@@ -29,6 +30,7 @@ export default function ProductsPage() {
   const search = searchParams.get('search') || ''
   const featured = searchParams.get('featured') || ''
   const isNew = searchParams.get('new') || ''
+  const sale = searchParams.get('sale') || ''
 
   useEffect(() => {
     setLoading(true)
@@ -38,13 +40,14 @@ export default function ProductsPage() {
     if (search) params.search = search
     if (featured) params.featured = featured
     if (isNew) params.new = isNew
+    if (sale) params.sale = sale
 
     api
       .getProducts(params)
       .then(setProducts)
       .catch(() => setProducts([]))
       .finally(() => setLoading(false))
-  }, [gender, category, search, featured, isNew])
+  }, [gender, category, search, featured, isNew, sale])
 
   const setFilter = (key: string, value: string) => {
     const next = new URLSearchParams(searchParams)
@@ -65,7 +68,9 @@ export default function ProductsPage() {
       ? 'Featured'
       : isNew
         ? 'New Arrivals'
-        : gender
+        : sale
+          ? 'Sale'
+          : gender
           ? `${gender.charAt(0).toUpperCase() + gender.slice(1)}'s Shoes`
           : category || 'All Products'
 

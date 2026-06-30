@@ -1,6 +1,6 @@
 import type {
   AuthResponse, Cart, Product, User, Review, WishlistItem,
-  ShoeFinderResult, ShoeFinderPrefs, SizeAdvice, MemberProfile,
+  ShoeFinderResult, ShoeFinderPrefs, SizeAdvice, MemberProfile, Order,
 } from '../types'
 
 const API_BASE = import.meta.env.VITE_API_URL || '/api'
@@ -85,7 +85,7 @@ export const api = {
   logout: () =>
     request<{ detail: string }>('/auth/logout/', { method: 'POST' }),
 
-  getMe: () => request<User>('/auth/me/'),
+  getMe: () => request<User & { member?: MemberProfile }>('/auth/me/'),
 
   getCart: () => request<Cart>('/cart/'),
 
@@ -146,4 +146,14 @@ export const api = {
     }),
 
   getMember: () => request<MemberProfile>('/member/'),
+
+  getOrders: () => request<Order[]>('/orders/'),
+
+  checkout: () => request<Order>('/checkout/', { method: 'POST' }),
+
+  subscribeNewsletter: (email: string) =>
+    request<{ detail: string }>('/newsletter/', {
+      method: 'POST',
+      body: JSON.stringify({ email }),
+    }),
 }

@@ -34,11 +34,14 @@ export default function ProductCard({ product, showLive }: Props) {
   const navigate = useNavigate()
   const [msg, setMsg] = useState('')
 
-  const price = Number(product.price).toLocaleString('en-US', {
+  const price = Number(product.effective_price || product.price).toLocaleString('en-US', {
     style: 'currency',
     currency: 'USD',
     minimumFractionDigits: 0,
   })
+  const originalPrice = product.is_on_sale
+    ? Number(product.price).toLocaleString('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0 })
+    : null
 
   const handleWishlist = async (e: React.MouseEvent) => {
     e.preventDefault()
@@ -73,6 +76,9 @@ export default function ProductCard({ product, showLive }: Props) {
       <Link to={`/products/${product.id}`} className="product-card">
         <div className="product-card-image">
           {product.is_new && <span className="product-badge">Just In</span>}
+          {product.is_on_sale && product.discount_percent ? (
+            <span className="product-badge sale-badge">-{product.discount_percent}%</span>
+          ) : null}
           {showLive && product.live_viewers && (
             <span className="live-badge">{product.live_viewers} viewing</span>
           )}
@@ -111,7 +117,10 @@ export default function ProductCard({ product, showLive }: Props) {
               <span>({product.review_count})</span>
             </div>
           )}
-          <span className="price">{price}</span>
+          <span className="price">
+            {price}
+            {originalPrice && <s className="original-price">{originalPrice}</s>}
+          </span>
         </div>
       </Link>
       {msg && <p className="card-toast">{msg}</p>}

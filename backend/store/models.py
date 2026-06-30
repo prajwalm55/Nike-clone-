@@ -7,18 +7,23 @@ class Product(models.Model):
         ('men', 'Men'),
         ('women', 'Women'),
         ('unisex', 'Unisex'),
+        ('kids', 'Kids'),
     ]
 
     name = models.CharField(max_length=200)
     subtitle = models.CharField(max_length=200, blank=True)
     description = models.TextField(blank=True)
     price = models.DecimalField(max_digits=10, decimal_places=2)
+    sale_price = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
+    is_on_sale = models.BooleanField(default=False)
     category = models.CharField(max_length=100, default='Lifestyle')
     gender = models.CharField(max_length=20, choices=GENDER_CHOICES, default='unisex')
     color = models.CharField(max_length=80, blank=True)
     image_url = models.URLField(max_length=500, blank=True)
     image_url_2 = models.URLField(max_length=500, blank=True)
     sizes = models.JSONField(default=list, blank=True)
+    tags = models.JSONField(default=list, blank=True)
+    sustainability_score = models.PositiveSmallIntegerField(default=50)
     is_featured = models.BooleanField(default=False)
     is_new = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -43,6 +48,18 @@ class Product(models.Model):
     @property
     def review_count(self):
         return self.reviews.count()
+
+    @property
+    def effective_price(self):
+        if self.is_on_sale and self.sale_price:
+            return self.sale_price
+        return self.price
+
+    @property
+    def discount_percent(self):
+        if self.is_on_sale and self.sale_price and self.price > self.sale_price:
+            return int((1 - float(self.sale_price) / float(self.price)) * 100)
+        return 0
 
 
 class Review(models.Model):
@@ -140,4 +157,44 @@ class CartItem(models.Model):
 
     @property
     def subtotal(self):
-        return self.product.price * self.quantity
+        return self.product.effective_price * self.quantity
+
+
+class Order(models.Model):
+    STATUS_CHOICES = [
+        ('processing', 'Processing'),
+        ('shipped', 'Shipped'),
+        ('delivered', 'Delivered'),
+        ('cancelled', 'Cancelled'),
+    ]
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, related_name='orders', on_delete=models.CASCADE)
+    total = models.DecimalField(max_digits=10, decimal_places=2)
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='processing')
+    tracking_number = models.CharField(max_length=50, blank=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
+    class Meta:
+        ordering = ['-created_at']
+
+    def __str__(self):
+        return f"Order #{self.id} — {self.user.username}"
+
+
+class OrderItem(models.Model):
+    order = models.ForeignKey(Order, related_name='items', on_delete=models.CASCADE)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    product_name = models.CharField(max_length=200)
+    quantity = models.PositiveIntegerField(default=1)
+    size = models.CharField(max_length=20)
+    price = models.DecimalField(max_digits=10, decimal_places=2)
+
+    def __str__(self):
+        return f"{self.quantity}x {self.product_name}"
+
+
+class NewsletterSubscriber(models.Model):
+    email = models.EmailField(unique=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.email

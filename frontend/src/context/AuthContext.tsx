@@ -9,6 +9,46 @@ import {
 import { api } from '../api/client'
 import type { User, MemberProfile } from '../types'
 
+const USER_STORAGE_KEY = 'nike_user'
+const MEMBER_STORAGE_KEY = 'nike_member'
+
+function loadStoredUser(): User | null {
+  try {
+    const raw = localStorage.getItem(USER_STORAGE_KEY)
+    return raw ? (JSON.parse(raw) as User) : null
+  } catch {
+    return null
+  }
+}
+
+function loadStoredMember(): MemberProfile | null {
+  try {
+    const raw = localStorage.getItem(MEMBER_STORAGE_KEY)
+    return raw ? (JSON.parse(raw) as MemberProfile) : null
+  } catch {
+    return null
+  }
+}
+
+function persistSession(user: User | null, member: MemberProfile | null) {
+  if (user) {
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user))
+  } else {
+    localStorage.removeItem(USER_STORAGE_KEY)
+  }
+  if (member) {
+    localStorage.setItem(MEMBER_STORAGE_KEY, JSON.stringify(member))
+  } else {
+    localStorage.removeItem(MEMBER_STORAGE_KEY)
+  }
+}
+
+function clearSession() {
+  localStorage.removeItem('token')
+  localStorage.removeItem(USER_STORAGE_KEY)
+  localStorage.removeItem(MEMBER_STORAGE_KEY)
+}
+
 interface AuthContextType {
   user: User | null
   member: MemberProfile | null
@@ -22,37 +62,53 @@ interface AuthContextType {
     lastName?: string,
   ) => Promise<void>
   logout: () => Promise<void>
+  refreshUser: () => Promise<void>
 }
 
 const AuthContext = createContext<AuthContextType | null>(null)
 
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const [user, setUser] = useState<User | null>(null)
-  const [member, setMember] = useState<MemberProfile | null>(null)
+  const [user, setUser] = useState<User | null>(loadStoredUser)
+  const [member, setMember] = useState<MemberProfile | null>(loadStoredMember)
   const [loading, setLoading] = useState(true)
+
+  const applySession = useCallback((nextUser: User | null, nextMember: MemberProfile | null) => {
+    setUser(nextUser)
+    setMember(nextMember)
+    persistSession(nextUser, nextMember)
+  }, [])
+
+  const refreshUser = useCallback(async () => {
+    const token = localStorage.getItem('token')
+    if (!token) {
+      applySession(null, null)
+      return
+    }
+    const data = await api.getMe()
+    const { member: profile, ...userData } = data
+    applySession(userData as User, profile ?? null)
+  }, [applySession])
 
   useEffect(() => {
     const token = localStorage.getItem('token')
-    if (token) {
-      api
-        .getMe()
-        .then((data) => {
-          setUser(data)
-          setMember(data.member ?? null)
-        })
-        .catch(() => localStorage.removeItem('token'))
-        .finally(() => setLoading(false))
-    } else {
+    if (!token) {
+      applySession(null, null)
       setLoading(false)
+      return
     }
-  }, [])
+    refreshUser()
+      .catch(() => {
+        clearSession()
+        applySession(null, null)
+      })
+      .finally(() => setLoading(false))
+  }, [applySession, refreshUser])
 
   const login = useCallback(async (email: string, password: string) => {
     const res = await api.login({ email, password })
     localStorage.setItem('token', res.token)
-    setUser(res.user)
-    setMember(res.member ?? null)
-  }, [])
+    applySession(res.user, res.member ?? null)
+  }, [applySession])
 
   const register = useCallback(
     async (
@@ -70,10 +126,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         last_name: lastName,
       })
       localStorage.setItem('token', res.token)
-      setUser(res.user)
-      setMember(res.member ?? null)
+      applySession(res.user, res.member ?? null)
     },
-    [],
+    [applySession],
   )
 
   const logout = useCallback(async () => {
@@ -82,13 +137,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     } catch {
       // token may already be invalid
     }
-    localStorage.removeItem('token')
-    setUser(null)
-    setMember(null)
-  }, [])
+    clearSession()
+    applySession(null, null)
+  }, [applySession])
 
   return (
-    <AuthContext.Provider value={{ user, member, loading, login, register, logout }}>
+    <AuthContext.Provider value={{ user, member, loading, login, register, logout, refreshUser }}>
       {children}
     </AuthContext.Provider>
   )

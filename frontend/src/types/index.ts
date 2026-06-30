@@ -5,13 +5,19 @@ export interface Product {
   description: string
   price: string
   category: string
-  gender: 'men' | 'women' | 'unisex'
+  gender: 'men' | 'women' | 'unisex' | 'kids'
   color: string
   image_url: string
   image_url_2: string
   sizes: string[]
   is_featured: boolean
   is_new: boolean
+  is_on_sale?: boolean
+  sale_price?: string | null
+  effective_price?: string
+  discount_percent?: number
+  tags?: string[]
+  sustainability_score?: number
   created_at: string
   average_rating?: number
   review_count?: number
@@ -88,7 +94,16 @@ export interface SizeAdvice {
 export interface ShoeFinderPrefs {
   activity: 'running' | 'training' | 'lifestyle' | 'racing'
   surface: 'road' | 'trail' | 'gym' | 'court'
-  gender: 'men' | 'women' | 'unisex'
+  gender: 'men' | 'women' | 'unisex' | 'kids'
   experience: 'beginner' | 'intermediate' | 'advanced'
   budget: 'under150' | '150to200' | 'over200'
+}
+
+export interface Order {
+  id: number
+  total: string
+  status: 'processing' | 'shipped' | 'delivered' | 'cancelled'
+  tracking_number: string
+  items: { id: number; product_name: string; quantity: number; size: string; price: string }[]
+  created_at: string
 }

@@ -15,6 +15,16 @@ import ShoeFinderPage from './pages/ShoeFinderPage'
 import ComparePage from './pages/ComparePage'
 import WishlistPage from './pages/WishlistPage'
 import MemberPage from './pages/MemberPage'
+import SalePage from './pages/SalePage'
+import KidsPage from './pages/KidsPage'
+import LookbookPage from './pages/LookbookPage'
+import SustainabilityPage from './pages/SustainabilityPage'
+import SizeGuidePage from './pages/SizeGuidePage'
+import AboutPage from './pages/AboutPage'
+import HelpPage from './pages/HelpPage'
+import OrdersPage from './pages/OrdersPage'
+import OutfitBuilderPage from './pages/OutfitBuilderPage'
+import AccountPage from './pages/AccountPage'
 
 export default function App() {
   return (
@@ -36,6 +46,16 @@ export default function App() {
                   <Route path="/compare" element={<ComparePage />} />
                   <Route path="/wishlist" element={<WishlistPage />} />
                   <Route path="/member" element={<MemberPage />} />
+                  <Route path="/sale" element={<SalePage />} />
+                  <Route path="/kids" element={<KidsPage />} />
+                  <Route path="/lookbook" element={<LookbookPage />} />
+                  <Route path="/sustainability" element={<SustainabilityPage />} />
+                  <Route path="/size-guide" element={<SizeGuidePage />} />
+                  <Route path="/about" element={<AboutPage />} />
+                  <Route path="/help" element={<HelpPage />} />
+                  <Route path="/orders" element={<OrdersPage />} />
+                  <Route path="/outfit-builder" element={<OutfitBuilderPage />} />
+                  <Route path="/account" element={<AccountPage />} />
                 </Routes>
               </main>
               <Footer />

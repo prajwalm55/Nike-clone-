@@ -31,6 +31,7 @@ const STEPS = [
       { value: 'men', label: 'Men', icon: '' },
       { value: 'women', label: 'Women', icon: '' },
       { value: 'unisex', label: 'Everyone', icon: '' },
+      { value: 'kids', label: 'Kids', icon: '' },
     ],
   },
   {

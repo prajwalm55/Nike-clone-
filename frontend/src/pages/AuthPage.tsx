@@ -19,7 +19,7 @@ export default function AuthPage() {
   })
 
   useEffect(() => {
-    if (user) navigate('/', { replace: true })
+    if (user) navigate('/account', { replace: true })
   }, [user, navigate])
 
   const handleLogin = async (e: React.FormEvent) => {
@@ -28,7 +28,7 @@ export default function AuthPage() {
     setLoading(true)
     try {
       await login(loginForm.email, loginForm.password)
-      navigate('/')
+      navigate('/account')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Login failed')
     } finally {
@@ -48,7 +48,7 @@ export default function AuthPage() {
         registerForm.first_name,
         registerForm.last_name,
       )
-      navigate('/')
+      navigate('/account')
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Registration failed')
     } finally {

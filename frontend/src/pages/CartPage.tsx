@@ -1,10 +1,15 @@
-import { Link } from 'react-router-dom'
+import { Link, useNavigate } from 'react-router-dom'
 import { useState } from 'react'
 import { useCart } from '../context/CartContext'
+import { useAuth } from '../context/AuthContext'
+import { api } from '../api/client'
 
 export default function CartPage() {
-  const { cart, loading, updateItem, removeItem } = useCart()
+  const { cart, loading, updateItem, removeItem, refreshCart } = useCart()
+  const { user } = useAuth()
+  const navigate = useNavigate()
   const [error, setError] = useState('')
+  const [checkingOut, setCheckingOut] = useState(false)
 
   const handleUpdate = async (itemId: number, quantity: number) => {
     setError('')
@@ -21,6 +26,24 @@ export default function CartPage() {
       await removeItem(itemId)
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Failed to remove item')
+    }
+  }
+
+  const handleCheckout = async () => {
+    if (!user) {
+      navigate('/auth')
+      return
+    }
+    setCheckingOut(true)
+    setError('')
+    try {
+      await api.checkout()
+      await refreshCart()
+      navigate('/orders')
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Checkout failed')
+    } finally {
+      setCheckingOut(false)
     }
   }
 
@@ -117,8 +140,13 @@ export default function CartPage() {
             <span>Total</span>
             <span>{fmt(total)}</span>
           </div>
-          <button className="btn btn-primary btn-full" style={{ marginTop: 24 }}>
-            Checkout
+          <button
+            className="btn btn-primary btn-full"
+            style={{ marginTop: 24 }}
+            onClick={handleCheckout}
+            disabled={checkingOut}
+          >
+            {checkingOut ? 'Processing…' : user ? 'Checkout' : 'Sign in to Checkout'}
           </button>
           <p style={{ marginTop: 12, fontSize: 12, color: '#737373', textAlign: 'center' }}>
             Free shipping on orders over $150

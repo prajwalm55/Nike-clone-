@@ -10,6 +10,7 @@ export default function HomePage() {
   const [featured, setFeatured] = useState<Product[]>([])
   const [newArrivals, setNewArrivals] = useState<Product[]>([])
   const [trending, setTrending] = useState<Product[]>([])
+  const [saleItems, setSaleItems] = useState<Product[]>([])
   const [loading, setLoading] = useState(true)
   const { recent } = useRecentlyViewed()
 
@@ -18,16 +19,19 @@ export default function HomePage() {
       api.getProducts({ featured: 'true' }),
       api.getProducts({ new: 'true' }),
       api.getTrending(),
+      api.getProducts({ sale: 'true' }),
     ])
-      .then(([feat, newest, trend]) => {
+      .then(([feat, newest, trend, sale]) => {
         setFeatured(feat)
         setNewArrivals(newest)
         setTrending(trend)
+        setSaleItems(sale)
       })
       .catch(() => {
         setFeatured([])
         setNewArrivals([])
         setTrending([])
+        setSaleItems([])
       })
       .finally(() => setLoading(false))
   }, [])
@@ -54,12 +58,26 @@ export default function HomePage() {
           <Link to="/shoe-finder" className="btn btn-white">Try Shoe Finder</Link>
         </div>
         <div className="innovation-card dark">
-          <span className="feature-badge">Membership</span>
-          <h2>Join Nike Membership</h2>
-          <p>Earn points on every purchase, unlock Gold & Platinum tiers, and get exclusive benefits.</p>
-          <Link to="/member" className="btn btn-white">View Benefits</Link>
+          <span className="feature-badge">Outfit Builder</span>
+          <h2>Build your rotation</h2>
+          <p>Mix lifestyle, performance, and Jordan picks into one complete outfit.</p>
+          <Link to="/outfit-builder" className="btn btn-white">Try Outfit Builder</Link>
         </div>
       </section>
+
+      {saleItems.length > 0 && (
+        <section className="section">
+          <div className="section-header">
+            <h2 className="section-title">Sale</h2>
+            <Link to="/sale" className="section-link">Shop All</Link>
+          </div>
+          <div className="product-grid">
+            {saleItems.slice(0, 4).map((p) => (
+              <ProductCard key={p.id} product={p} />
+            ))}
+          </div>
+        </section>
+      )}
 
       {trending.length > 0 && (
         <section className="section">
@@ -76,7 +94,7 @@ export default function HomePage() {
       )}
 
       <section className="section">
-        <div className="category-grid">
+        <div className="category-grid category-grid-4">
           <Link to="/products?gender=men" className="category-tile">
             <img src="https://images.pexels.com/photos/2529148/pexels-photo-2529148.jpeg?auto=compress&w=800" alt="Men" />
             <div className="category-tile-overlay"><h3>Men</h3></div>
@@ -85,6 +103,22 @@ export default function HomePage() {
             <img src="https://images.pexels.com/photos/1598505/pexels-photo-1598505.jpeg?auto=compress&w=800" alt="Women" />
             <div className="category-tile-overlay"><h3>Women</h3></div>
           </Link>
+          <Link to="/kids" className="category-tile">
+            <img src="https://images.pexels.com/photos/46149/pexels-photo-46149.jpeg?auto=compress&w=800" alt="Kids" />
+            <div className="category-tile-overlay"><h3>Kids</h3></div>
+          </Link>
+          <Link to="/sustainability" className="category-tile">
+            <img src="https://images.pexels.com/photos/1032110/pexels-photo-1032110.jpeg?auto=compress&w=800" alt="Sustainability" />
+            <div className="category-tile-overlay"><h3>Move to Zero</h3></div>
+          </Link>
+        </div>
+      </section>
+
+      <section className="section membership-banner">
+        <div className="membership-banner-inner">
+          <h2>Join Nike Membership</h2>
+          <p>Earn points, unlock tiers, and get member-only perks.</p>
+          <Link to="/member" className="btn btn-primary">View Benefits</Link>
         </div>
       </section>
 

@@ -3,6 +3,7 @@ import { Link, useNavigate, useLocation } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import { useCart } from '../context/CartContext'
 import { useWishlist } from '../context/WishlistContext'
+import AccountMenu from './AccountMenu'
 
 function NikeLogo() {
   return (
@@ -34,7 +35,9 @@ export default function Header() {
     { to: '/shoe-finder', label: 'Shoe Finder' },
     { to: '/products?gender=men', label: 'Men' },
     { to: '/products?gender=women', label: 'Women' },
-    { to: '/products?category=Jordan', label: 'Jordan' },
+    { to: '/kids', label: 'Kids' },
+    { to: '/sale', label: 'Sale' },
+    { to: '/lookbook', label: 'Lookbook' },
     { to: '/products?new=true', label: 'New' },
   ]
 
@@ -86,21 +89,7 @@ export default function Header() {
               />
             </form>
 
-            {user ? (
-              <button onClick={() => logout()} title={`Signed in as ${user.username}`}>
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-              </button>
-            ) : (
-              <Link to="/auth" title="Sign in">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
-                  <circle cx="12" cy="7" r="4" />
-                </svg>
-              </Link>
-            )}
+            <AccountMenu />
 
             <Link to="/member" title="Membership">
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -142,6 +131,11 @@ export default function Header() {
           </button>
         </div>
         <nav className="mobile-nav-links">
+          {user && (
+            <Link to="/account" onClick={() => setMobileOpen(false)} className="mobile-account-link">
+              Account — {user.first_name || user.username}
+            </Link>
+          )}
           {navLinks.map((link) => (
             <Link key={link.label} to={link.to} onClick={() => setMobileOpen(false)}>
               {link.label}

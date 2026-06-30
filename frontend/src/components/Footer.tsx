@@ -1,38 +1,43 @@
+import { Link } from 'react-router-dom'
+import Newsletter from './Newsletter'
+
 export default function Footer() {
   return (
     <footer className="footer">
+      <Newsletter />
       <div className="footer-grid">
         <div className="footer-col">
-          <h4>Resources</h4>
-          <a href="#">Find A Store</a>
-          <a href="#">Become A Member</a>
-          <a href="#">Running Shoe Finder</a>
+          <h4>Shop</h4>
+          <Link to="/products">All Products</Link>
+          <Link to="/sale">Sale</Link>
+          <Link to="/kids">Kids</Link>
+          <Link to="/lookbook">Lookbook</Link>
+          <Link to="/outfit-builder">Outfit Builder</Link>
         </div>
         <div className="footer-col">
           <h4>Help</h4>
-          <a href="#">Get Help</a>
-          <a href="#">Order Status</a>
-          <a href="#">Shipping and Delivery</a>
-          <a href="#">Returns</a>
+          <Link to="/help">FAQ</Link>
+          <Link to="/orders">Order Status</Link>
+          <Link to="/size-guide">Size Guide</Link>
+          <Link to="/shoe-finder">Shoe Finder</Link>
         </div>
         <div className="footer-col">
           <h4>Company</h4>
-          <a href="#">About Nike</a>
-          <a href="#">News</a>
-          <a href="#">Careers</a>
-          <a href="#">Investors</a>
+          <Link to="/about">About</Link>
+          <Link to="/sustainability">Sustainability</Link>
+          <Link to="/member">Membership</Link>
+          <Link to="/account">Account</Link>
         </div>
         <div className="footer-col">
-          <h4>Promotions & Discounts</h4>
-          <a href="#">Student</a>
-          <a href="#">Military</a>
-          <a href="#">Teacher</a>
-          <a href="#">First Responders</a>
+          <h4>Features</h4>
+          <Link to="/compare">Compare</Link>
+          <Link to="/wishlist">Wishlist</Link>
+          <Link to="/shoe-finder">AI Shoe Finder</Link>
         </div>
       </div>
       <div className="footer-bottom">
-        <span>&copy; 2026 Nike, Inc. All Rights Reserved</span>
-        <span>Terms of Use &middot; Nike Privacy Policy</span>
+        <span>&copy; 2026 Nike Clone. Educational demo — not affiliated with Nike, Inc.</span>
+        <span>Terms of Use &middot; Privacy Policy</span>
       </div>
     </footer>
   )

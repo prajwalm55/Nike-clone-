@@ -7,12 +7,12 @@ from rest_framework.response import Response
 from rest_framework.views import APIView
 import random
 
-from .models import Product, Cart, CartItem, Review, WishlistItem, MemberProfile
+from .models import Product, Cart, CartItem, Review, WishlistItem, MemberProfile, Order, OrderItem
 from .serializers import (
     ProductSerializer, RegisterSerializer, UserSerializer, MemberProfileSerializer,
     CartSerializer, AddToCartSerializer, UpdateCartItemSerializer,
     ReviewSerializer, CreateReviewSerializer, WishlistItemSerializer,
-    ShoeFinderSerializer, SizeAdvisorSerializer,
+    ShoeFinderSerializer, SizeAdvisorSerializer, OrderSerializer, NewsletterSerializer,
 )
 from .services import recommend_shoes, advise_size, get_trending_products
 
@@ -34,6 +34,7 @@ class ProductListView(generics.ListAPIView):
         search = self.request.query_params.get('search')
         featured = self.request.query_params.get('featured')
         new = self.request.query_params.get('new')
+        sale = self.request.query_params.get('sale')
 
         if category:
             qs = qs.filter(category__iexact=category)
@@ -43,6 +44,8 @@ class ProductListView(generics.ListAPIView):
             qs = qs.filter(is_featured=True)
         if new and new.lower() == 'true':
             qs = qs.filter(is_new=True)
+        if sale and sale.lower() == 'true':
+            qs = qs.filter(is_on_sale=True)
         if search:
             qs = qs.filter(
                 Q(name__icontains=search) |
@@ -348,3 +351,55 @@ class ClearCartView(APIView):
             profile.save()
         cart.items.all().delete()
         return Response(CartSerializer(cart).data, status=status.HTTP_200_OK)
+
+
+# ----------------------------- Orders -----------------------------
+
+class OrderListView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        orders = Order.objects.filter(user=request.user)
+        return Response(OrderSerializer(orders, many=True).data)
+
+
+class CheckoutView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        cart = get_or_create_cart(request)
+        if not cart or cart.items.count() == 0:
+            return Response({'detail': 'Cart is empty.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        total = cart.total_price
+        order = Order.objects.create(
+            user=request.user,
+            total=total,
+            tracking_number=f'NK{random.randint(100000000, 999999999)}',
+        )
+        for item in cart.items.all():
+            OrderItem.objects.create(
+                order=order,
+                product=item.product,
+                product_name=item.product.name,
+                quantity=item.quantity,
+                size=item.size,
+                price=item.product.effective_price,
+            )
+        profile = get_or_create_member(request.user)
+        profile.shoes_owned += cart.total_items
+        profile.add_points(cart.total_items * 50)
+        cart.items.all().delete()
+        return Response(OrderSerializer(order).data, status=status.HTTP_201_CREATED)
+
+
+# ----------------------------- Newsletter -----------------------------
+
+class NewsletterView(APIView):
+    permission_classes = [AllowAny]
+
+    def post(self, request):
+        serializer = NewsletterSerializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+        return Response({'detail': 'Subscribed successfully!'}, status=status.HTTP_201_CREATED)
