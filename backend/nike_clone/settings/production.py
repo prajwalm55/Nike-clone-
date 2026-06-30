@@ -11,10 +11,14 @@ ALLOWED_HOSTS = os.environ.get('DJANGO_ALLOWED_HOSTS', '').split(',')
 if not ALLOWED_HOSTS or ALLOWED_HOSTS == ['']:
     raise ValueError('DJANGO_ALLOWED_HOSTS must be set in production')
 
-# Database — PostgreSQL via DATABASE_URL, falls back to SQLite
+# Database — PostgreSQL via DATABASE_URL (Neon requires SSL)
 DATABASE_URL = os.environ.get('DATABASE_URL')
 if DATABASE_URL:
-    DATABASES['default'] = dj_database_url.parse(DATABASE_URL, conn_max_age=600, ssl_require=False)
+    DATABASES['default'] = dj_database_url.parse(
+        DATABASE_URL,
+        conn_max_age=600,
+        ssl_require=True,
+    )
 
 # CORS
 CORS_ALLOW_ALL_ORIGINS = False
